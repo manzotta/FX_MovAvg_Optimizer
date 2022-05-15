@@ -1,0 +1,134 @@
+package portfolio;
+
+import position.BuyPosition;
+import position.Position;
+import position.SellPosition;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+public class Portfolio {
+
+    /// Attributes
+
+    private LocalDateTime createTime;
+
+    private LocalDateTime currentTime;
+
+    private ArrayList<Position> positions;
+
+
+    /// Methods
+
+    public Portfolio(LocalDateTime date) {
+
+        this.createTime = date;
+        this.currentTime = date;
+        this.positions = new ArrayList<>();
+
+    }
+
+
+    public LocalDateTime getCreateTime() {return this.createTime; }
+
+
+    public LocalDateTime getCurrentTime() { return this.currentTime; }
+
+
+    // Jelenlegi idő beállítása
+    public void setCurrentTime(LocalDateTime date) { this.currentTime = date; }
+
+
+    // Új pozíció hozzáadása a portfólióhoz
+    public void addPosition(Position pos) {
+
+        this.positions.add(pos);
+
+    }
+
+
+    public void closeBuyPositions(LocalDateTime closeDate, double closePrice) {
+
+        if ( !(this.buyPositions.isEmpty()) ) {
+
+            for (BuyPosition buyPos : this.buyPositions) {
+                if (buyPos.getIsOpen()) {
+                    buyPos.closePosition(closeDate, closePrice);
+                }
+            }
+
+        }
+
+
+    }
+
+
+    public void addSellPosition(LocalDateTime openDate, double lotSize, double openPrice) {
+        SellPosition pos = new SellPosition(openDate, 1, openPrice);
+
+        this.sellPositions.add(pos);
+
+    }
+
+
+    public void updatePortfolio(LocalDateTime date, double price) {
+
+        if (this.buyPositions.isEmpty() && this.sellPositions.isEmpty())
+            return;
+
+        if ( !(this.buyPositions.isEmpty()) ) {
+
+            for (BuyPosition buyPos : this.buyPositions) {
+                buyPos.updatePosition(date, price);
+            }
+
+        }
+
+        if ( !(this.sellPositions.isEmpty()) ) {
+
+            for (SellPosition sellPos : this.sellPositions) {
+                sellPos.updatePosition();
+            }
+
+        }
+
+    }
+
+
+    // az iteráció végén.. ami pozíció nyitva van még azt le kell zárni
+    public void closePortfolio() {
+
+        if (this.buyPositions.isEmpty() && this.sellPositions.isEmpty())
+            return;
+
+        if (!(this.buyPositions.isEmpty())) {
+
+            for (BuyPosition buyPos : this.buyPositions) {
+                if ( buyPos.getIsOpen() )
+                    buyPos.forcedClosePosition();
+            }
+
+        }
+
+    }
+
+
+    public double winnigRatio() {
+
+        double wr = 0.0;
+        double siz = this.buyPositions.size();
+        double successful = 0;
+
+        for (BuyPosition buyPos : this.buyPositions) {
+            if ( buyPos.getIsOpen() == false) {
+                if ( buyPos.getSuccess() )
+                    successful = successful + 1;
+            }
+        }
+
+        return (successful / siz) * 100;
+
+    }
+
+
+}

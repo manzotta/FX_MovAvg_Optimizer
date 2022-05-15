@@ -1,0 +1,161 @@
+package gui;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+
+public class StartGUI extends JFrame {
+
+    /// Attributes
+
+    private JTextField fastMA_min = new JTextField("", 6);
+    private JTextField fastMA_max = new JTextField("", 6);
+
+    private JTextField midMA_min = new JTextField("", 6);
+    private JTextField midMA_max = new JTextField("", 6);
+
+    private JTextField slowMA_min = new JTextField("", 6);
+    private JTextField slowMA_max = new JTextField("", 6);
+
+    private JButton button = new JButton("Optimize!");
+
+    private Object[] type_MA = {"Simple", "Exponential"};
+    private JComboBox<Object> cbox_TypeMA = new JComboBox(type_MA);
+
+    //private Object[] applied_price = {"Close", "Open", "High", "Low"};
+    //private JComboBox<Object> cbox_2 = new JComboBox(applied_price);
+
+
+    class OkButtonActionListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+
+            //String output = cae.caesarCode(tf_felso.getText(), (char)cbox.getSelectedItem());
+            //tf_also.setText(output);
+
+        }
+    }
+
+
+
+    /// Methods
+
+
+    public StartGUI() {
+
+        super();
+
+        this.setTitle("SwingLab");
+        this.setSize(400, 200);
+        this.setResizable(true);
+        this.setLocationRelativeTo(null);
+        this.setLayout(new BorderLayout());
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+
+        button.addActionListener(new OkButtonActionListener());
+        fastMA_max.setEditable(false);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+
+        // Panel 1
+        JPanel pane = new JPanel();
+        pane.setLayout(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        boolean shouldFill = false;
+        if (shouldFill) {
+            //natural height, maximum width
+            c.fill = GridBagConstraints.HORIZONTAL;
+        }
+
+        //button = new JButton("Button 1");
+        JLabel lab = new JLabel("fast MA");
+        boolean shouldWeightX = true;
+        if (shouldWeightX) {
+            c.weightx = 1;
+        }
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.PAGE_END;
+        pane.add(lab, c);
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.5;
+        c.gridx = 1;
+        c.gridy = 0;
+        pane.add(this.fastMA_min, c);
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 0.5;
+        c.gridx = 2;
+        c.gridy = 0;
+        pane.add(fastMA_max, c);
+
+        // Panel 2
+        JPanel panel_2 = new JPanel();
+        //panel_1.setLayout(new FlowLayout());
+        panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+
+        panel_2.add(new JLabel("mid MA"));
+        panel_2.add(midMA_min);
+        panel_2.add(midMA_max);
+
+
+        // Panel 3
+        JPanel panel_3 = new JPanel();
+        //panel_1.setLayout(new FlowLayout());
+        panel_3.setLayout(new BoxLayout(panel_3, BoxLayout.X_AXIS));
+
+        panel_3.add(new JLabel("slow MA"));
+        panel_3.add(slowMA_min);
+        panel_3.add(slowMA_max);
+
+
+        // Panel 4
+        JPanel panel_4 = new JPanel();
+
+        //panel_4.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+        panel_4.setLayout(new FlowLayout());
+
+        panel_4.add(new JLabel("MA módszer:"));
+        //panel_2.add(Box.createRigidArea(new Dimension(10, 10)));
+        panel_4.add(cbox_TypeMA);
+
+
+        // Panel 5
+        JPanel panel_5 = new JPanel();
+
+        //panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+        panel_5.setLayout(new FlowLayout());
+
+        panel_5.add(new JLabel("Alkalmazott ár:"));
+        //panel_2.add(Box.createRigidArea(new Dimension(10, 10)));
+        //panel_3.add(cbox_2);
+
+
+        // Panel 6
+        JPanel panel_6 = new JPanel();
+
+        //panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+        panel_6.setLayout(new FlowLayout());
+
+        panel_6.add(button);
+
+
+        mainPanel.add(pane);
+        mainPanel.add(panel_2);
+        mainPanel.add(panel_3);
+        mainPanel.add(panel_4);
+
+        this.add(mainPanel);
+
+    }
+
+}

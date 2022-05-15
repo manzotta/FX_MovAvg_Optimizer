@@ -1,0 +1,43 @@
+
+import gui.StartGUI;
+import optimizer.Optimizer;
+
+
+public class Main {
+
+
+    public static void main(String[] args) throws Throwable {
+
+        // Program prog_1 = new Program(); // Model - View - Controller
+
+        // A JButton a Program egy számolj függvényét hívja meg és én csak azt mondom meg h milyen értékekkel számoljon
+        // MVC átnézése : nálam egyben lesz a View és a Controller
+        // Text
+        // Az alapértékek vannak eltárolva és amikor én kiválasztanám az értékeket akkor az átállítás setter függvényeket hív
+        // A második megoldáshoz több ActionListener definiálása szükséges
+
+
+        // a start GUI-ban a három MA tag paraméteret kellene tudni megadni
+        // a választott módszert
+        // a .... az egyes grafikus elemekhez több osztály
+
+        StartGUI gui = new StartGUI();
+        gui.setVisible(true);
+        //System.out.println(prices.get(ind));
+
+
+
+
+        //Optimizer myOptimizer = new Optimizer(9, 29, 39, 69, 200, 201, "Simple");
+
+        myOptimizer.importData();
+
+        myOptimizer.initTraders();
+
+        myOptimizer.maxProfit();
+
+        myOptimizer.getResults();
+    }
+
+
+}

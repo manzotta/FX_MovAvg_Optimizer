@@ -1,0 +1,326 @@
+package trader;
+
+import indicator.ExponentialMA;
+import indicator.MovingAverage;
+import indicator.SimpleMA;
+import portfolio.Portfolio;
+import tseries.TimeSeries;
+
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.*;
+
+public class Trader {
+
+    /// Attributes
+
+    private MovingAverage MA_M15_Fast;
+    private MovingAverage MA_M15_Slow;
+
+    private MovingAverage MA_H1_Fast;
+    private MovingAverage MA_H1_Slow;
+
+    private MovingAverage MA_D1_Fast;
+    private MovingAverage MA_D1_Slow;
+
+    private TimeSeries priceSeries_M15 = new TimeSeries();
+    private TimeSeries priceSeries_H1 = new TimeSeries();
+    private TimeSeries priceSeries_D1 = new TimeSeries();
+
+    private LocalDateTime startTime;
+
+    private TreeMap<LocalDateTime, String> Signals = new TreeMap<>();
+
+    private Portfolio myPortfolio;
+
+
+
+    /// Methods
+
+    // Összesen 6db mozgóátlagot kell majd létrehozni : három idősík X 2
+
+    // A trader fogja az indikátorokat használni, a 6. db indikátort
+
+    // A trader hozza létre a pozíciókat
+
+    // A trader értékeli ki a pozíciókat tehát egy ár-idősort is kapnia kell ugye ..
+
+
+    public Trader(TimeSeries priceSeries, int fast, int mid, int slow, String type) throws Exception {
+
+        this.priceSeries_M15 = priceSeries;
+
+
+        switch(type)
+        {
+            case "Simple":
+
+                // M15
+                this.MA_M15_Fast = new SimpleMA(fast);
+                this.MA_M15_Slow = new SimpleMA(mid);
+
+                // H1
+                this.MA_H1_Fast = new SimpleMA(fast);
+                this.MA_H1_Slow = new SimpleMA(mid);
+
+                // D1
+                this.MA_D1_Fast = new SimpleMA(mid);
+                this.MA_D1_Slow = new SimpleMA(slow);
+
+                break;
+
+            case "Exponential":
+
+                // M15
+                this.MA_M15_Fast = new ExponentialMA(fast);
+                this.MA_M15_Slow = new ExponentialMA(mid);
+
+                // H1
+                this.MA_H1_Fast = new ExponentialMA(fast);
+                this.MA_H1_Slow = new ExponentialMA(mid);
+
+                // D1
+                this.MA_D1_Fast = new ExponentialMA(mid);
+                this.MA_D1_Slow = new ExponentialMA(slow);
+
+                break;
+
+            default:
+                Exception e = new Exception("Helytelen input érték");
+                throw e;
+
+        }
+
+    }
+
+
+    public void prepareIndicators() {
+
+        try {
+
+            this.priceSeries_H1 = this.priceSeries_M15.convert("H1");
+            System.out.println(this.priceSeries_H1.getLength());
+
+            this.priceSeries_D1 = this.priceSeries_M15.convert("D1");
+            System.out.println(this.priceSeries_D1.getLength());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Calculate MA Values
+        MA_M15_Fast.calc(this.priceSeries_M15, "close");
+        MA_M15_Slow.calc(this.priceSeries_M15, "close");
+
+        MA_H1_Fast.calc(this.priceSeries_H1, "close");
+        MA_H1_Slow.calc(this.priceSeries_H1, "close");
+
+        MA_D1_Fast.calc(this.priceSeries_D1, "close");
+        MA_D1_Slow.calc(this.priceSeries_D1, "close");
+
+
+    }
+
+
+    public void prepareSample() {
+
+        // LocalDateTime for M15
+        LocalDateTime m15_startDate = LocalDateTime.of(2010, Month.JANUARY, 2, 3, 15, 00);
+
+        // LocalDateTime for H1 (M15 előtti teljes lezárt óra)
+        LocalDateTime h1_startDate = LocalDateTime.of(2010, Month.JANUARY, 2, 2, 00, 00);
+
+        // LocalDateTime for D1 (M15 előtti teljes lezárt nap)
+        LocalDateTime d1_startDate = LocalDateTime.of(2010, Month.JANUARY, 1, 0, 00, 00);
+
+
+        double testSMA = ma_m15_fast.getValues().get(m15_startDate);
+        System.out.println(testSMA);
+        //sma_m15_fast.getValues().ceilingKey(200);
+
+
+        // M15 idősíkon értelmezett iterátor
+        SortedMap<LocalDateTime, Double> sampleMA_M15_fast = ma_m15_fast.getValues().tailMap(m15_startDate);
+        Set setMA_M15_fast = sampleMA_M15_fast.entrySet();
+        Iterator iterMA_M15_fast = setMA_M15_fast.iterator();
+        Map.Entry entryMA_M15_fast = (Map.Entry) iterMA_M15_fast.next();
+
+        SortedMap<LocalDateTime, Double> sampleMA_M15_slow = ma_m15_slow.getValues().tailMap(m15_startDate);
+        Set setMA_M15_slow = sampleMA_M15_slow.entrySet();
+        Iterator iterMA_M15_slow = setMA_M15_slow.iterator();
+        Map.Entry entryMA_M15_slow = (Map.Entry) iterMA_M15_slow.next();
+
+
+        // H1 idősíkon értelmezett iterátor
+        SortedMap<LocalDateTime, Double> sampleMA_H1_fast = ma_h1_fast.getValues().tailMap(h1_startDate);
+        Set setMA_H1_fast = sampleMA_H1_fast.entrySet();
+        Iterator iterMA_H1_fast = setMA_H1_fast.iterator();
+        Map.Entry entryMA_H1_fast = (Map.Entry) iterMA_H1_fast.next();
+
+        SortedMap<LocalDateTime, Double> sampleMA_H1_slow = ma_h1_slow.getValues().tailMap(h1_startDate);
+        Set setMA_H1_slow = sampleMA_H1_slow.entrySet();
+        Iterator iterMA_H1_slow = setMA_H1_slow.iterator();
+        Map.Entry entryMA_H1_slow = (Map.Entry) iterMA_H1_slow.next();
+
+
+        // D1 idősíkon értelmezett iterátorok
+        SortedMap<LocalDateTime, Double> sampleMA_D1_fast = ma_d1_fast.getValues().tailMap(d1_startDate);
+        Set setMA_D1_fast = sampleMA_D1_fast.entrySet();
+        Iterator iterMA_D1_fast = setMA_D1_fast.iterator();
+        Map.Entry entryMA_D1_fast = (Map.Entry) iterMA_D1_fast.next();
+
+        SortedMap<LocalDateTime, Double> sampleMA_D1_slow = ma_d1_slow.getValues().tailMap(d1_startDate);
+        Set setMA_D1_slow = sampleMA_D1_slow.entrySet();
+        Iterator iterMA_D1_slow = setMA_D1_slow.iterator();
+        Map.Entry entryMA_D1_slow = (Map.Entry) iterMA_D1_slow.next();
+
+
+    }
+
+
+
+
+    // Ez még masszív lesz...
+    public void trade() {
+
+        int counter = 0;
+        int crosses = 0;
+
+        double oldM15_fast = 99.9; // elsőre ne legyen jelzés!
+        double oldM15_slow = 0.01; //
+
+        double oldH1_fast = 99.9; // elsőre ne legyen jelzés!
+        double oldH1_slow = 0.01; //
+
+
+
+        LocalDateTime startDateTime = (LocalDateTime) entryMA_M15_fast.getKey();
+
+        TimeSeries myPrice = new TimeSeries();
+        myPrice.setValues(price_data.getValues());
+
+        Portfolio myPortfolio = new Portfolio(startDateTime);
+
+        LocalDateTime currentDateTime;
+        double currentPrice;
+
+
+        while(iterMA_M15_fast.hasNext()) {
+
+
+            currentDateTime = (LocalDateTime) entryMA_M15_fast.getKey();
+            currentPrice = myPrice.getValues().get(currentDateTime).getClose();
+
+            myPortfolio.setCurrentDate(currentDateTime);
+
+
+            if( (counter % 4) == 3 ) {
+                entryMA_H1_fast = (Map.Entry) iterMA_H1_fast.next();
+                entryMA_H1_slow = (Map.Entry) iterMA_H1_slow.next();
+                //System.out.println(currentDateTime.toString());
+                //LocalDateTime date_h1 = (LocalDateTime) entryMA_H1_fast.getKey();
+            }
+
+            if( (counter % 96) == 95 ) {
+                entryMA_D1_fast = (Map.Entry) iterMA_D1_fast.next();
+                entryMA_D1_slow = (Map.Entry) iterMA_D1_slow.next();
+                System.out.println(currentDateTime.toString());
+                //LocalDateTime date_d1 = (LocalDateTime) mapEntry_d1.getKey();
+            }
+
+
+            // M15
+            double m15_fast = (double) entryMA_M15_fast.getValue();
+            double m15_slow = (double) entryMA_M15_slow.getValue();
+
+
+            // H1
+            double h1_fast = (double) entryMA_H1_fast.getValue();
+            double h1_slow = (double) entryMA_H1_slow.getValue();
+
+
+            // D1
+            double d1_fast = (double) entryMA_D1_fast.getValue();
+            double d1_slow = (double) entryMA_D1_slow.getValue();
+
+
+            // BuyPosition nyitásának logikája stratégia logikája (egyenlőséget egyelőre nem engedünk meg)
+            if( d1_fast > d1_slow && h1_fast > h1_slow && oldM15_fast < oldM15_slow && m15_fast > m15_slow ) {
+                // if( oldM15_fast < oldM15_slow && m15_fast > m15_slow ) {
+                // Itt nyitnánk alapból pozíciót
+                // System.out.println("Buy");
+                Signals.put(currentDateTime, "Buy!");
+
+                myPortfolio.addBuyPosition(currentDateTime,1,currentPrice);
+
+                crosses++;
+
+            }
+
+
+            // BuyPosition zárásának logikája stratégia logikája (egyenlőséget egyelőre nem engedünk meg)
+            if( d1_fast > d1_slow && oldH1_fast > oldH1_slow && h1_fast < h1_slow ) {
+
+                // Itt zárjuk a nyitott long pozíciókat
+                // System.out.println("Close Buy Positions!");
+                Signals.put(currentDateTime, "Close Buy Positions!");
+
+                myPortfolio.closeBuyPositions(currentDateTime, currentPrice);
+
+
+
+            }
+
+
+            /*SellPosition nyitásának logikája stratégia logikája
+            if( d1_fast < d1_slow && h1_fast < h1_slow && oldM15_fast > oldM15_slow && m15_fast < m15_slow ) {
+
+                // Itt nyitnánk alapból pozíciót
+                // System.out.println("Sell");
+                Signals.put(currentDateTime, "Sell!");
+
+                myPortfolio.addSellPosition(currentDateTime,1,currentPrice);
+
+            }
+             */
+
+            // Portfolio frissítése
+            myPortfolio.updatePortfolio(currentDateTime, currentPrice);
+
+            oldH1_fast = h1_fast;
+            oldH1_slow = h1_slow;
+
+            oldM15_fast = m15_fast;
+            oldM15_slow = m15_slow;
+
+            entryMA_M15_fast = (Map.Entry) iterMA_M15_fast.next(); //M15-ös iterátor léptetése
+            entryMA_M15_slow = (Map.Entry) iterMA_M15_slow.next(); //M15-ös iterátor léptetése
+
+            counter = counter + 1;
+
+
+        }
+
+
+        //myPortfolio.closePortfolio();
+
+        double winningRatio = 0.0;
+        winningRatio = myPortfolio.winnigRatio();
+
+        System.out.println(crosses);
+
+        /* Store the signals
+        FileOutputStream f = new FileOutputStream("data/signals.txt");
+        ObjectOutputStream out = new ObjectOutputStream(f);
+        out.writeObject(Signals);
+        out.close();
+        */
+
+        /* Display content of price_data using Iterator */
+
+
+    }
+
+
+
+}
